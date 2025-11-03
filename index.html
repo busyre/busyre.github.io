@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html>
+<body>
+<style>
+    canvas {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100vw;
+        height: 100vh;
+	image-rendering: pixelated;
+	image-rendering: crisp-edges;
+        display: block;
+    }
+</style>
+    
+    <canvas id="canvas"></canvas>
+
+    <script>
+        const canvas = document.getElementById('canvas');
+        const ctx = canvas.getContext('2d');
+
+        fetch('main.wasm')
+            .then(r => r.arrayBuffer())
+            .then(bytes => WebAssembly.instantiate(bytes, {}))
+            .then(obj => {
+                const bufferPtr = obj.instance.exports.get_buffer();
+                const memory = obj.instance.exports.memory;
+                
+let lastTime = 0;
+
+                function animate(timestamp) {
+if (timestamp - lastTime > 190) { // 4 раза в секунду
+    const logicalWidth = 256;
+    const logicalHeight = 256;
+    
+    obj.instance.exports.draw_pixels();
+    const buffer = new Uint8ClampedArray(memory.buffer, bufferPtr, logicalWidth * logicalHeight * 4);
+    const imageData = new ImageData(buffer, logicalWidth, logicalHeight);
+    
+    // Создаем временный canvas для масштабирования
+    const tempCanvas = document.createElement('canvas');
+    tempCanvas.width = logicalWidth;
+    tempCanvas.height = logicalHeight;
+    const tempCtx = tempCanvas.getContext('2d');
+    tempCtx.putImageData(imageData, 0, 0);
+    
+    // Рисуем с масштабированием на основной canvas
+    ctx.imageSmoothingEnabled = false;
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    ctx.drawImage(tempCanvas, 0, 0, canvas.width, canvas.height);
+lastTime = timestamp;
+   }
+    requestAnimationFrame(animate);
+}
+                animate();
+            });
+    </script>
+</body>
+</html>
