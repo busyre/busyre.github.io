@@ -20,10 +20,21 @@
     <canvas id="canvas" width="256" height="256"></canvas>
 
     <script>
+	
         const canvas = document.getElementById('canvas');
         const ctx = canvas.getContext('2d');
         
         let obj, imageData;
+		let mouseX = 0, mouseY = 0, mouseDown = 0;
+
+		canvas.addEventListener('mousemove', (e) => {
+			const rect = canvas.getBoundingClientRect();
+			mouseX = (e.clientX - rect.left) * (256 / rect.width);
+			mouseY = (e.clientY - rect.top) * (256 / rect.height);
+		});
+
+canvas.addEventListener('mousedown', () => mouseDown = 1);
+canvas.addEventListener('mouseup', () => mouseDown = 0);
 
         fetch('main.wasm')
             .then(r => r.arrayBuffer())
@@ -43,7 +54,7 @@
         function animate(timeStamp) {
             if (!obj) return;
 			/*if (timeStamp - lastTime > 250) */{
-				obj.instance.exports.draw_pixels(timeStamp);
+				obj.instance.exports.draw_pixels(timeStamp, mouseX, mouseY, mouseDown);
 				ctx.putImageData(imageData, 0, 0);
 			}
 			requestAnimationFrame(animate);
