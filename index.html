@@ -1,76 +1,48 @@
 <!DOCTYPE html>
 <html>
+<head>
+    <style>
+        body { 
+            margin: 0; 
+            background: black;
+            overflow: hidden;
+        }
+        canvas {
+            width: 100vw;
+            height: 100vh;
+            image-rendering: pixelated;
+            image-rendering: crisp-edges;
+            display: block;
+        }
+    </style>
+</head>
 <body>
-<style>
-body {
-    margin: 0;
-    background: black;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    min-height: 100vh;
-}
-    canvas {
-        width: min(100vw, 100vh);
-        height: min(100vw, 100vh);
-	image-rendering: pixelated;
-	image-rendering: crisp-edges;
-        max-width: 100%;
-        max-height: 100%;
-    }
-</style>
-    
-    <canvas id="canvas"></canvas>
+    <canvas id="canvas" width="256" height="256"></canvas>
 
     <script>
         const canvas = document.getElementById('canvas');
         const ctx = canvas.getContext('2d');
         
-        const logicalWidth = 256;
-	const logicalHeight = 256;
-
-        let wasm, buffer, imageData;
+        let obj, imageData;
 
         fetch('main.wasm')
             .then(r => r.arrayBuffer())
             .then(bytes => WebAssembly.instantiate(bytes, {}))
-            .then(obj => {
-console.log('WASM loaded, exports:', Object.keys(obj.instance.exports));
-		wasm = obj;
+            .then(wasmObj => {
+                obj = wasmObj;
                 const bufferPtr = obj.instance.exports.get_buffer();
-console.log('Buffer pointer:', bufferPtr);
                 const memory = obj.instance.exports.memory;
-                buffer = new Uint8ClampedArray(memory.buffer, bufferPtr, logicalWidth * logicalHeight * 4);
-                imageData = new ImageData(buffer, logicalWidth, logicalHeight);
+                const bufferView = new Uint8ClampedArray(memory.buffer, bufferPtr, 256 * 256 * 4);
+                imageData = new ImageData(bufferView, 256, 256);
                 
-	    });
+                setInterval(animate, 133);
+            });
 
-	let lastTime = 0;
-        function animate(timestamp) {
-            if (wasm) { // if okay
-	    if (timestamp - lastTime > 133) { // ms
-	        wasm.instance.exports.draw_pixels();
-    
-    
-    // Создаем временный canvas для масштабирования
-    const tempCanvas = document.createElement('canvas');
-    tempCanvas.width = logicalWidth;
-    tempCanvas.height = logicalHeight;
-    const tempCtx = tempCanvas.getContext('2d');
-    tempCtx.putImageData(imageData, 0, 0);
-    
-    // Рисуем с масштабированием на основной canvas
-    ctx.imageSmoothingEnabled = false;
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
-    ctx.drawImage(tempCanvas, 0, 0, canvas.width, canvas.height);
-lastTime = timestamp;
-   }
-} // if okey
-    requestAnimationFrame(animate);
-}
-                
-        animate();
-
+        function animate() {
+            if (!obj) return;
+            obj.instance.exports.draw_pixels();
+            ctx.putImageData(imageData, 0, 0);
+        }
     </script>
 </body>
 </html>
