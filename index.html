@@ -35,14 +35,20 @@
                 const bufferView = new Uint8ClampedArray(memory.buffer, bufferPtr, 256 * 256 * 4);
                 imageData = new ImageData(bufferView, 256, 256);
                 
-                setInterval(animate, 133);
+                //setInterval(animate, 133);
+				requestAnimationFrame(animate);
             });
-
-        function animate() {
+			
+		//let lastTime = 0;
+        function animate(timeStamp) {
             if (!obj) return;
-            obj.instance.exports.draw_pixels();
-            ctx.putImageData(imageData, 0, 0);
+			/*if (timeStamp - lastTime > 250) */{
+				obj.instance.exports.draw_pixels(timeStamp);
+				ctx.putImageData(imageData, 0, 0);
+			}
+			requestAnimationFrame(animate);
         }
+		
     </script>
 </body>
 </html>
