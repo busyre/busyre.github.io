@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <style>
+        body { 
+            margin: 0; 
+            background: black;
+            overflow: hidden;
+        }
+        canvas {
+            width: 100vw;
+            height: 100vh;
+            image-rendering: pixelated;
+            image-rendering: crisp-edges;
+            display: block;
+        }
+    </style>
+</head>
+<body>
+    <canvas id="canvas" width="256" height="256"></canvas>
+
+    <script>
+        const canvas = document.getElementById('canvas');
+        const ctx = canvas.getContext('2d');
+        
+        let obj, imageData;
+
+        fetch('main.wasm')
+            .then(r => r.arrayBuffer())
+            .then(bytes => WebAssembly.instantiate(bytes, {}))
+            .then(wasmObj => {
+                obj = wasmObj;
+                const bufferPtr = obj.instance.exports.get_buffer();
+                const memory = obj.instance.exports.memory;
+                const bufferView = new Uint8ClampedArray(memory.buffer, bufferPtr, 256 * 256 * 4);
+                imageData = new ImageData(bufferView, 256, 256);
+                
+                //setInterval(animate, 133);
+				requestAnimationFrame(animate);
+            });
+			
+		//let lastTime = 0;
+        function animate(timeStamp) {
+            if (!obj) return;
+			/*if (timeStamp - lastTime > 250) */{
+				obj.instance.exports.draw_pixels(timeStamp);
+				ctx.putImageData(imageData, 0, 0);
+			}
+			requestAnimationFrame(animate);
+        }
+		
+    </script>
+</body>
+</html>
