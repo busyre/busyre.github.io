@@ -27,14 +27,37 @@
         let obj, imageData;
 		let mouseX = 0, mouseY = 0, mouseDown = 0;
 
+		// Для мыши
 		canvas.addEventListener('mousemove', (e) => {
 			const rect = canvas.getBoundingClientRect();
 			mouseX = (e.clientX - rect.left) * (256 / rect.width);
 			mouseY = (e.clientY - rect.top) * (256 / rect.height);
 		});
 
-canvas.addEventListener('mousedown', () => mouseDown = 1);
-canvas.addEventListener('mouseup', () => mouseDown = 0);
+		canvas.addEventListener('mousedown', () => mouseDown = 1);
+		canvas.addEventListener('mouseup', () => mouseDown = 0);
+
+		// Для тачскрина
+		canvas.addEventListener('touchmove', (e) => {
+			e.preventDefault();
+			const rect = canvas.getBoundingClientRect();
+			mouseX = (e.touches[0].clientX - rect.left) * (256 / rect.width);
+			mouseY = (e.touches[0].clientY - rect.top) * (256 / rect.height);
+		});
+
+		canvas.addEventListener('touchstart', (e) => {
+			e.preventDefault();
+			mouseDown = 1;
+			// Обновляем координаты сразу при касании
+			const rect = canvas.getBoundingClientRect();
+			mouseX = (e.touches[0].clientX - rect.left) * (256 / rect.width);
+			mouseY = (e.touches[0].clientY - rect.top) * (256 / rect.height);
+		});
+
+		canvas.addEventListener('touchend', (e) => {
+			e.preventDefault();
+			mouseDown = 0;
+		});
 
         fetch('main.wasm')
             .then(r => r.arrayBuffer())
