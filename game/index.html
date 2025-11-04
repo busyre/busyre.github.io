@@ -58,6 +58,16 @@
 			e.preventDefault();
 			mouseDown = 0;
 		});
+		
+		// Для тапов на тачпаде MacBook
+		canvas.addEventListener('click', (e) => {
+			const rect = canvas.getBoundingClientRect();
+			mouseX = (e.clientX - rect.left) * (256 / rect.width);
+			mouseY = (e.clientY - rect.top) * (256 / rect.height);
+			mouseDown = 1;
+			// TODO next frame
+			setTimeout(() => mouseDown = 0, 100); // Имитируем короткое нажатие
+		});
 
         fetch('main.wasm')
             .then(r => r.arrayBuffer())
