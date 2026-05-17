@@ -330,7 +330,7 @@
 
                 <div class="input-group">
                     <label for="phoneInput">Ваш телефон</label>
-                    <input type="tel" id="phoneInput" placeholder="+7 ___ ___ __ __" value="">
+                    <input type="tel" id="phoneInput" placeholder="+7 ___ ___ __ __">
                 </div>
                 <div class="input-group">
                     <label for="messageInput">Что нужно сделать? (кратко)</label>
@@ -339,7 +339,7 @@
 
                 <button class="btn" id="mailBtn">Отправить письмо</button>
                 <div class="small-note">
-                    После нажатия откроется ваш почтовый клиент. Письмо будет содержать ваш телефон и описание задачи.
+                    После нажатия откроется ваш почтовый клиент. Письмо будет отправлено на test@mail.e
                 </div>
                 <div class="small-note" style="margin-top: 8px;">
                     Или позвоните по номеру +7 (123) 456-78-90
@@ -384,33 +384,38 @@
         const mailBtn = document.getElementById('mailBtn');
 
         function buildMailToLink(phone, description) {
+            const recipient = "test@mail.e";
             const subject = "Заявка на ремонт / благоустройство";
             let body = "";
+            
             if (phone && phone.trim() !== "") {
                 body += `Телефон для связи: ${phone.trim()}\n`;
             } else {
                 body += `Телефон для связи: не указан\n`;
             }
+            
             if (description && description.trim() !== "") {
                 body += `\nОписание задачи:\n${description.trim()}\n`;
             } else {
                 body += `\nОписание задачи: клиент не оставил деталей, просьба уточнить.\n`;
             }
+            
             body += `\n---\nОтправлено с сайта "Ремонт и благоустройство".\nНаправления: отделочные работы, отмостка, частные дома, ремонт офисов, благоустройство участка.`;
-
+            
             const encodedSubject = encodeURIComponent(subject);
             const encodedBody = encodeURIComponent(body);
-            return `mailto:?subject=${encodedSubject}&body=${encodedBody}`;
+            const encodedRecipient = encodeURIComponent(recipient);
+            
+            return `mailto:${encodedRecipient}?subject=${encodedSubject}&body=${encodedBody}`;
         }
 
         mailBtn.addEventListener('click', (e) => {
             e.preventDefault();
-            let phoneValue = phoneInput.value.trim();
+            const phoneValue = phoneInput.value.trim();
             const descriptionValue = messageInput.value.trim();
             const mailLink = buildMailToLink(phoneValue, descriptionValue);
             window.location.href = mailLink;
         });
-      
     })();
 </script>
 </body>
