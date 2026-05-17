@@ -404,9 +404,8 @@
             
             const encodedSubject = encodeURIComponent(subject);
             const encodedBody = encodeURIComponent(body);
-            const encodedRecipient = encodeURIComponent(recipient);
             
-            return `mailto:${encodedRecipient}?subject=${encodedSubject}&body=${encodedBody}`;
+            return `mailto:${recipient}?subject=${encodedSubject}&body=${encodedBody}`;
         }
 
         mailBtn.addEventListener('click', (e) => {
